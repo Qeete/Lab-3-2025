@@ -16,6 +16,9 @@ public class Main {
         
         System.out.println("\n=== ТЕСТИРОВАНИЕ ИСКЛЮЧЕНИЙ В КОНСТРУКТОРАХ ===");
         testConstructorExceptions();
+        
+        System.out.println("\n=== ДЕТАЛЬНОЕ ТЕСТИРОВАНИЕ ОПЕРАЦИЙ С ТОЧКАМИ ===");
+        testPointOperations();
     }
     
     public static void testFunction(TabulatedFunction function) {
@@ -148,6 +151,156 @@ public class Main {
         } catch (IllegalArgumentException e) {
             System.out.println("LinkedListTabulatedFunction: Выброшено исключение при массиве длины < 2: " + e.getMessage());
         }
+    }
+    
+    public static void testPointOperations() {
+        System.out.println("=== ТЕСТИРОВАНИЕ ОПЕРАЦИЙ С ТОЧКАМИ В LinkedListTabulatedFunction ===");
         
+        // Создаем тестовую функцию
+        LinkedListTabulatedFunction function = new LinkedListTabulatedFunction(0, 4, new double[]{0, 1, 4, 9, 16});
+        System.out.println("Исходная функция:");
+        printFunctionPoints(function);
+        
+        // 1. Тестирование добавления точек
+        System.out.println("\n1. ТЕСТИРОВАНИЕ ДОБАВЛЕНИЯ ТОЧЕК:");
+        
+        // Добавление в середину
+        try {
+            function.addPoint(new FunctionPoint(0.5, 0.25));
+            System.out.println("Добавлена точка в середину: (0.5, 0.25)");
+            printFunctionPoints(function);
+        } catch (InappropriateFunctionPointException e) {
+            System.out.println("Ошибка при добавлении точки в середину: " + e.getMessage());
+        }
+        
+        // Добавление в начало
+        try {
+            function.addPoint(new FunctionPoint(-0.5, 0.25));
+            System.out.println("Добавлена точка в начало: (-0.5, 0.25)");
+            printFunctionPoints(function);
+        } catch (InappropriateFunctionPointException e) {
+            System.out.println("Ошибка при добавлении точки в начало: " + e.getMessage());
+        }
+        
+        // Добавление в конец
+        try {
+            function.addPoint(new FunctionPoint(5.0, 25.0));
+            System.out.println("Добавлена точка в конец: (5.0, 25.0)");
+            printFunctionPoints(function);
+        } catch (InappropriateFunctionPointException e) {
+            System.out.println("Ошибка при добавлении точки в конец: " + e.getMessage());
+        }
+        
+        // Попытка добавить точку с существующим X
+        try {
+            function.addPoint(new FunctionPoint(2.0, 100.0));
+            System.out.println("Ошибка: точка с X=2.0 была добавлена, хотя должна была вызвать исключение");
+        } catch (InappropriateFunctionPointException e) {
+            System.out.println("Корректно обработана попытка добавить точку с существующим X: " + e.getMessage());
+        }
+        
+        // 2. Тестирование удаления точек
+        System.out.println("\n2. ТЕСТИРОВАНИЕ УДАЛЕНИЯ ТОЧЕК:");
+        
+        // Удаление из середины
+        try {
+            System.out.println("Удаляем точку с индексом 3 (X=" + function.getPointX(3) + ")");
+            function.deletePoint(3);
+            printFunctionPoints(function);
+        } catch (FunctionPointIndexOutOfBoundsException | IllegalStateException e) {
+            System.out.println("Ошибка при удалении точки из середины: " + e.getMessage());
+        }
+        
+        // Удаление из начала
+        try {
+            System.out.println("Удаляем точку с индексом 0 (X=" + function.getPointX(0) + ")");
+            function.deletePoint(0);
+            printFunctionPoints(function);
+        } catch (FunctionPointIndexOutOfBoundsException | IllegalStateException e) {
+            System.out.println("Ошибка при удалении точки из начала: " + e.getMessage());
+        }
+        
+        // Удаление из конца
+        try {
+            int lastIndex = function.getPointsCount() - 1;
+            System.out.println("Удаляем точку с индексом " + lastIndex + " (X=" + function.getPointX(lastIndex) + ")");
+            function.deletePoint(lastIndex);
+            printFunctionPoints(function);
+        } catch (FunctionPointIndexOutOfBoundsException | IllegalStateException e) {
+            System.out.println("Ошибка при удалении точки из конца: " + e.getMessage());
+        }
+        
+        // Попытка удалить точку при минимальном количестве
+        try {
+            System.out.println("Попытка удалить точку при pointsCount = " + function.getPointsCount());
+            function.deletePoint(0);
+            System.out.println("Ошибка: точка была удалена, хотя должно было быть исключение");
+        } catch (IllegalStateException e) {
+            System.out.println("Корректно обработана попытка удалить точку при pointsCount < 3: " + e.getMessage());
+        }
+        
+        // 3. Тестирование замены точек
+        System.out.println("\n3. ТЕСТИРОВАНИЕ ЗАМЕНЫ ТОЧЕК:");
+        
+        // Замена точки с сохранением порядка
+        try {
+            FunctionPoint oldPoint = function.getPoint(1);
+            FunctionPoint newPoint = new FunctionPoint(1.5, 2.25);
+            System.out.println("Заменяем точку " + formatPoint(oldPoint) + " на " + formatPoint(newPoint));
+            function.setPoint(1, newPoint);
+            printFunctionPoints(function);
+        } catch (InappropriateFunctionPointException | FunctionPointIndexOutOfBoundsException e) {
+            System.out.println("Ошибка при замене точки: " + e.getMessage());
+        }
+        
+        // Попытка замены с нарушением порядка (X меньше предыдущего)
+        try {
+            FunctionPoint invalidPoint = new FunctionPoint(0.5, 10.0);
+            System.out.println("Попытка заменить точку на " + formatPoint(invalidPoint) + " (нарушение порядка)");
+            function.setPoint(2, invalidPoint);
+            System.out.println("Ошибка: замена прошла успешно, хотя должна была вызвать исключение");
+        } catch (InappropriateFunctionPointException e) {
+            System.out.println("Корректно обработана попытка замены с нарушением порядка: " + e.getMessage());
+        }
+        
+        // 4. Тестирование изменения координат
+        System.out.println("\n4. ТЕСТИРОВАНИЕ ИЗМЕНЕНИЯ КООРДИНАТ:");
+        
+        // Изменение X с сохранением порядка
+        try {
+            double oldX = function.getPointX(1);
+            System.out.println("Изменяем X точки с индексом 1 с " + oldX + " на 1.2");
+            function.setPointX(1, 1.2);
+            printFunctionPoints(function);
+        } catch (InappropriateFunctionPointException | FunctionPointIndexOutOfBoundsException e) {
+            System.out.println("Ошибка при изменении X координаты: " + e.getMessage());
+        }
+        
+        // Изменение Y
+        try {
+            double oldY = function.getPointY(0);
+            System.out.println("Изменяем Y точки с индексом 0 с " + oldY + " на 10.0");
+            function.setPointY(0, 10.0);
+            printFunctionPoints(function);
+        } catch (FunctionPointIndexOutOfBoundsException e) {
+            System.out.println("Ошибка при изменении Y координаты: " + e.getMessage());
+        }
+        
+        System.out.println("\n=== ТЕСТИРОВАНИЕ ОПЕРАЦИЙ С ТОЧКАМИ ЗАВЕРШЕНО ===");
+    }
+    
+    // Вспомогательный метод для форматирования точки
+    public static String formatPoint(FunctionPoint point) {
+        return String.format("(%.2f, %.2f)", point.getX(), point.getY());
+    }
+    
+    // Вспомогательный метод для вывода всех точек функции
+    public static void printFunctionPoints(TabulatedFunction function) {
+        System.out.print("Точки функции (" + function.getPointsCount() + "): ");
+        for (int i = 0; i < function.getPointsCount(); i++) {
+            FunctionPoint point = function.getPoint(i);
+            System.out.print(formatPoint(point) + (i < function.getPointsCount() - 1 ? ", " : ""));
+        }
+        System.out.println();
     }
 }
