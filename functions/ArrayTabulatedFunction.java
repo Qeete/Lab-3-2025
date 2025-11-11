@@ -3,6 +3,7 @@ package functions;
 public class ArrayTabulatedFunction implements TabulatedFunction {
     public FunctionPoint[] points;
     public int pointsCount;
+    private static final double EPSILON = 1e-10;
 
     public ArrayTabulatedFunction(double leftX, double rightX, int pointsCount) {
         // Проверка условий конструктора
@@ -67,7 +68,7 @@ public class ArrayTabulatedFunction implements TabulatedFunction {
             double curX = points[i].getX();
             double nextX = points[i+1].getX();
             
-            if(x == curX){
+            if(Math.abs(x - curX) < EPSILON){
                 return points[i].getY();
             }
             
@@ -75,7 +76,7 @@ public class ArrayTabulatedFunction implements TabulatedFunction {
                 return linearInterpolation(points[i], points[i+1], x);
             }
             
-            if(x == nextX){
+            if(Math.abs(x - nextX) < EPSILON){
                 return points[i+1].getY();
             }
         }
@@ -176,7 +177,7 @@ public class ArrayTabulatedFunction implements TabulatedFunction {
         
         // Проверяем, не существует ли уже точка с таким X
         for (int i = 0; i < pointsCount; i++) {
-            if (points[i].getX() == newX) {
+            if (Math.abs(points[i].getX() - newX) < EPSILON) {
                 throw new InappropriateFunctionPointException("Точка с таким X уже существует");
             }
         }

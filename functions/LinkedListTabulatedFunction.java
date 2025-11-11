@@ -11,6 +11,9 @@ public class LinkedListTabulatedFunction implements TabulatedFunction{
     private FunctionNode lastAccessedNode;
     private int lastAccessedIndex;
     
+    // Константа для сравнения вещественных чисел
+    private static final double EPSILON = 1e-10;
+    
     // Конструктор по умолчанию (пустой список)
     public LinkedListTabulatedFunction() {
         // Создаем голову, которая ссылается сама на себя
@@ -220,7 +223,7 @@ public class LinkedListTabulatedFunction implements TabulatedFunction{
         FunctionNode current = head.next;
         
         // Проверяем первую точку
-        if (x == current.point.getX()) {
+        if (Math.abs(x - current.point.getX()) < EPSILON) {
             return current.point.getY();
         }
         
@@ -229,7 +232,7 @@ public class LinkedListTabulatedFunction implements TabulatedFunction{
             double curX = current.point.getX();
             double nextX = current.next.point.getX();
             
-            if (x == nextX) {
+            if (Math.abs(x - nextX) < EPSILON) {
                 return current.next.point.getY();
             }
             
@@ -242,6 +245,7 @@ public class LinkedListTabulatedFunction implements TabulatedFunction{
         
         return Double.NaN;
     }
+    
     private double linearInterpolation(FunctionPoint p1, FunctionPoint p2, double x) {
         double x1 = p1.getX();
         double y1 = p1.getY();
@@ -309,7 +313,7 @@ public class LinkedListTabulatedFunction implements TabulatedFunction{
         // Проверяем, не существует ли уже точка с таким X
         FunctionNode current = head.next;
         for (int i = 0; i < pointsCount; i++) {
-            if (current.point.getX() == newX) {
+            if (Math.abs(current.point.getX() - newX) < EPSILON) {
                 throw new InappropriateFunctionPointException("Точка с таким X уже существует");
             }
             current = current.next;
@@ -327,6 +331,4 @@ public class LinkedListTabulatedFunction implements TabulatedFunction{
         FunctionNode newNode = addNodeByIndex(insertIndex);
         newNode.point = new FunctionPoint(point);
     }
-    
-
 }
